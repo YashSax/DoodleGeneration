@@ -39,3 +39,20 @@ Decoder will take the output and project it out back into the 7 values
 Loss:
     - For x, y distributions: Want to measure the error in the two distributions. Honestly for a first iteration, you could just predict the mean itself, no std
     - For pen_on_paper, pen_off_paper, finished -> cross entropy loss (since this is just classification)
+
+
+TODO:
+    - Build Dataset
+        - Collect and preprocess all doodles
+        - Load the embedding model + calculate embeddings for all the classes
+        - EXPERIMENT: Normalize embeddings
+        - X: class name embedding + a sequence of strokes of length k, k >= 1
+        - Y: strokes all shifted left one + new stroke
+    - Build Model
+        - Pass strokes through an MLP
+        - Concat class name embedding with strokes
+        - EXPERIMENT: Add position embeddings to strokes?
+        - Transformer Architecture, multiple layers of Self-Attention + MLP
+        - Decoder takes the output and puts it back into the length-5 vector
+        - Calculate Loss, Optimizer Step, etc.
+    
