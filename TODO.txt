@@ -55,4 +55,13 @@ TODO:
         - Transformer Architecture, multiple layers of Self-Attention + MLP
         - Decoder takes the output and puts it back into the length-5 vector
         - Calculate Loss, Optimizer Step, etc.
-    
+
+
+How do we want to structure the input?
+
+Inputs are between lengths of 49 - 148
+
+Padding/Clipping?
+ - Target a certain size of input -> 30?
+ - Pad/Clip
+ 
