@@ -1,11 +1,12 @@
-from torch.utils.data import Dataset
+import re
+from pathlib import Path
+from typing import List, Tuple
+
+import clip
 import numpy as np
 import torch
-import clip
-from pathlib import Path
+from torch.utils.data import Dataset
 from tqdm import tqdm
-from typing import List, Tuple
-import re
 
 
 def encode_stroke_data(stroke_data: np.array, pad_length=None):

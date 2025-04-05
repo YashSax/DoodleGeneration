@@ -1,17 +1,19 @@
-import numpy as np
-from doodle_parsing_utils import *
 import re
-import clip
-import torch
-from tqdm import tqdm
-from torch.utils.data import Dataset, DataLoader
 from pathlib import Path
 from typing import List, Tuple
+
+import clip
+import numpy as np
+import torch
 import torch.nn as nn
 import torch.optim
+from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
+
 from doodle_dataset import DoodleDataset
-from doodle_predictor_config import DoodlePredictorConfig
+from doodle_parsing_utils import *
 from doodle_predictor import DoodlePredictor, calculate_loss
+from doodle_predictor_config import DoodlePredictorConfig
 
 ENABLE_WANDB = True
 

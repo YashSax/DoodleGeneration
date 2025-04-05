@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
+
 from doodle_predictor_config import DoodlePredictorConfig
+
 
 class DoodlePredictor(nn.Module):
     def __init__(self, config: DoodlePredictorConfig):

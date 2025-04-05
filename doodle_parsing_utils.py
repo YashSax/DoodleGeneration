@@ -15,18 +15,18 @@
 
 # internal imports
 
-import numpy as np
-import matplotlib.pyplot as plt
-#from scipy.misc import imresize as resize
-from PIL import Image
-from IPython.display import SVG, display
-import svgwrite # conda install -c omnia svgwrite=1.1.6
-import os
 import json
+import os
 import random
 
+import matplotlib.pyplot as plt
+import numpy as np
+import svgwrite  # conda install -c omnia svgwrite=1.1.6
+from IPython.display import SVG, display
 from numba import jit
 from numpy import arange
+#from scipy.misc import imresize as resize
+from PIL import Image
 
 # Plot helper functions
 

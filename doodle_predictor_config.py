@@ -1,5 +1,6 @@
-from pathlib import Path
 import json
+from pathlib import Path
+
 
 class DoodlePredictorConfig:
     def __init__(self, config_path: Path):
