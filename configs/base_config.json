@@ -1,0 +1,17 @@
+{
+    "device": "cuda",
+    "stroke_input_size": 5,
+    "stroke_embed_size": 512,
+    "num_attention_heads": 32,
+    "num_transformer_blocks": 8,
+    "transformer_dropout": 0.1,
+    "block_size": 32,
+    "num_epochs": 5,
+    "lr": 1e-5,
+    "batch_size" : 1024,
+    
+    "project_name" : "Doodle Generator",
+    "experiment_name" : "more_epochs(really_fixed)",
+
+    "output_directory" : "models/more_epochs(really_fixed)/"
+}
