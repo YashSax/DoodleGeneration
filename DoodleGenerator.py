@@ -64,7 +64,7 @@ for epoch_num in tqdm(range(num_epochs)):
         model_out = doodle_predictor(xs.float(), ex_classname_embeddings.float())
 
         loss = calculate_loss(
-            model_out.double(), ys, position_coeff=0.00025, pen_state_coeff=0.99975
+            model_out.double(), ys, position_coeff=config.position_loss_coeff, pen_state_coeff=config.pen_state_loss_coeff
         )
         optimizer.zero_grad()
         loss.backward()
@@ -86,7 +86,7 @@ for epoch_num in tqdm(range(num_epochs)):
             model_out = doodle_predictor(xs.float(), ex_classname_embeddings.float())
             
             test_loss = calculate_loss(
-                model_out.double(), ys, position_coeff=0.00025, pen_state_coeff=0.99975
+                model_out.double(), ys, position_coeff=config.position_loss_coeff, pen_state_coeff=config.pen_state_loss_coeff
             )
             test_losses.append(test_loss.item())
             

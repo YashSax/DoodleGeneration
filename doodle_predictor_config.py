@@ -8,12 +8,16 @@ class DoodlePredictorConfig:
         
         self.config_dict = config
         self.device = config["device"]
+        self.clip_embedding_size = config["clip_embedding_size"]
         self.stroke_input_size = config["stroke_input_size"]
         self.stroke_embed_size = config["stroke_embed_size"] 
         self.num_attention_heads = config["num_attention_heads"]
         self.num_transformer_blocks = config["num_transformer_blocks"]
         self.transformer_dropout = config["transformer_dropout"]
         self.block_size = config["block_size"]
+        self.position_loss_coeff = config["position_loss_coeff"]
+        self.pen_state_loss_coeff = config["pen_state_loss_coeff"]
+
         self.num_epochs = config["num_epochs"]
         self.lr = config["lr"]
         self.batch_size = config["batch_size"]

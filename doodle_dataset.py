@@ -131,6 +131,10 @@ class DoodleDataset(Dataset):
         assert match, f"Regex for detecting classname failed on {file}"
         return match.group(1)
 
+    def _filter_data(data: np.ndarray):
+        
+        return data
+
     def _extract_data(self, file: Path, split: str, pad_length: int):
         assert split in [
             "train",
@@ -139,6 +143,9 @@ class DoodleDataset(Dataset):
         ], f"Split {split} is not one of: train, test, valid!"
 
         raw_data = np.load(file, encoding="latin1", allow_pickle=True)[split]
+
+        filtered_data = self._filter_data(raw_data)
+
         encoded_doodles = []
         for doodle in raw_data:
             encoded_doodles.append(encode_stroke_data(doodle, pad_length=pad_length))

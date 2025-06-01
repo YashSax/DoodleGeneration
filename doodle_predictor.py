@@ -13,6 +13,10 @@ class DoodlePredictor(nn.Module):
             device=self.config.device,
         ).to(self.config.device)
 
+        self.clip_embedding_layer = nn.Linear(
+            self.config.clip_embedding_size, self.config.stroke_embed_size
+        ).to(self.config.device)
+
         self.position_embedding_table = nn.Embedding(
             num_embeddings=self.config.block_size,
             embedding_dim=self.config.stroke_embed_size,
@@ -39,9 +43,10 @@ class DoodlePredictor(nn.Module):
             x
         )  # (batch_size, block_size - 1, self.stroke_embed_size)
 
-        # TODO: Currently this assumes that the CLIP embedding size is the same as self.config.stroke_embed_size
+        processed_classname_embedding = self.clip_embedding_layer(classname_embedding.unsqueeze(1))
+
         combined_input = torch.cat(
-            (encoded_strokes, classname_embedding.unsqueeze(1)), dim=1
+            (encoded_strokes, processed_classname_embedding), dim=1
         )  # (batch_size, block_size, self.stroke_embed_size)
 
         pos_emb = self.position_embedding_table(
@@ -105,11 +110,11 @@ class StrokeEncoderMLP(nn.Module):
 
         # TODO: Batchnorm, or some type of norm?
         self.net = nn.Sequential(
-            nn.Linear(self.input_size, 128),
+            nn.Linear(self.input_size, 256),
             nn.ReLU(),
-            nn.Linear(128, 256),
+            nn.Linear(256, 512),
             nn.ReLU(),
-            nn.Linear(256, self.output_size),
+            nn.Linear(512, self.output_size),
         )
 
     def forward(self, x):

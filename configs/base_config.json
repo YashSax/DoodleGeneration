@@ -1,17 +1,21 @@
 {
     "device": "cuda",
+    "clip_embedding_size": 512,
     "stroke_input_size": 5,
-    "stroke_embed_size": 512,
+    "stroke_embed_size": 1024,
     "num_attention_heads": 32,
     "num_transformer_blocks": 8,
     "transformer_dropout": 0.1,
     "block_size": 32,
+    "position_loss_coeff" : 0.5,
+    "pen_state_loss_coeff" : 0.5,
+
     "num_epochs": 10,
     "lr": 1e-5,
-    "batch_size" : 1024,
+    "batch_size" : 512,
     
     "project_name" : "Doodle Generator",
-    "experiment_name" : "even_more_epochs",
+    "experiment_name" : "bigger_embeds",
 
-    "output_directory" : "models/even_more_epochs/"
+    "output_directory" : "models/bigger_embeds/"
 }
