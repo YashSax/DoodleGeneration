@@ -3,4 +3,5 @@ shakespeare/
 wandb/
 temp/
 models/
+__pycache__/
 sample.svg

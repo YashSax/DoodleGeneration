@@ -11,12 +11,12 @@
     "position_loss_coeff" : 0.99,
     "pen_state_loss_coeff" : 0.01,
 
-    "num_epochs": 20,
-    "lr": 1e-6,
+    "num_epochs": 10,
+    "lr": 1e-5,
     "batch_size" : 512,
     
     "project_name" : "Doodle Generator",
-    "experiment_name" : "only_normalize_x",
+    "experiment_name" : "bugfixes",
 
-    "output_directory" : "models/only_normalize_x/"
+    "output_directory" : "models/bugfixes/"
 }

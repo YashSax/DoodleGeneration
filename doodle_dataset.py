@@ -153,7 +153,7 @@ class DoodleDataset(Dataset):
         if self.mean is not None and self.std is not None:
             x = self._normalize_drawing(x)
 
-        return full_doodle, torch.from_numpy(x), torch.from_numpy(y), classname_embedding
+        return torch.from_numpy(x), torch.from_numpy(y), classname_embedding
 
     def _extract_class_name(self, file: Path):
         # Example filename: `sketchrnn_apple.full.npz`
