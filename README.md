@@ -64,4 +64,32 @@ Inputs are between lengths of 49 - 148
 Padding/Clipping?
  - Target a certain size of input -> 30?
  - Pad/Clip
- 
+
+
+
+
+How are doodles represented?
+ - List of strokes: (delta_x, delta_y, pen_on_paper, pen_off_paper, finished)
+ - Start at (0, 0), finish whenever finished=1
+ - Benefit of this representation: don't have to predict absolute coordinates, only the movement of the pen
+
+Problem: Given a sequence of strokes + NL description of the object you're trying to draw, predict the next stroke
+
+NL description -> CLIP embedding
+Strokes -> stroke embeddings
+Combine embeddings into one sequence, Self Attention -> predict next stroke
+
+Model input: [text_embedding, stroke_1, stroke_2, ... stroke_n]
+Model output: [stroke_1, stroke_2, ... stroke_n, stroke_n+1]
+
+Loss: two components -> classification accuracy of pen state, regression of stroke coordinates
+
+(delta_x_mean, delta_x_logvar, delta_y_mean, delta_y_logvar, pen_on_paper, pen_off_paper, finished)
+
+Zia Notes:
+ - CLIP embeddings might not be a good mapping to drawings -> create constrastive embedding model that can map from word <-> sketch of word
+    - See if CLIP embeddings are similar for actual images of apples vs. drawings of apples
+    - Could potentially fine-tune CLIP on sketches, augment dataset with variations of the text
+ - Train encoder + decoder separately, and then fix them and train the transformer model
+ - Stroke embedding is too high, diffusing the information from 5 -> 1024
+ - Ignore the CLIP embedding part for now, just keep it constant -> try to first get the apple prediction working, then get it working on multiple types of doodles

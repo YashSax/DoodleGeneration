@@ -1,4 +1,5 @@
 from torch.utils.data import Dataset
+from doodle_parsing_utils import get_bounds
 import numpy as np
 import torch
 import clip
@@ -9,22 +10,23 @@ import re
 
 
 def encode_stroke_data(stroke_data: np.array, pad_length=None):
-    # Going from [x, y, lift_pen] to [delta_x, delta_y, pen_on_paper, pen_off_paper, finished]
-    new_doodle = np.zeros((stroke_data.shape[0], 5))
+    # Going from [delta_x, delta_y, lift_pen] to [delta_x, delta_y, pen_on_paper, pen_off_paper, finished]
+    pen_on_paper = stroke_data[:, 2] == 0
 
-    # Handling delta_x, delta_y
-    new_row = np.zeros((1, 3))
-    temp = np.vstack([new_row, stroke_data])
-    new_doodle[:, :2] = temp[1:, :2] - temp[:-1, :2]
+    pen_off_paper = stroke_data[:, 2] == 1
+    pen_off_paper[-1] = 0
 
-    # Handling pen_on_paper and pen_off_paper
-    new_doodle[:, 2] = stroke_data[:, 2] == 0
-    new_doodle[:, 3] = stroke_data[:, 2] == 1
+    finished = np.zeros_like(pen_on_paper)
+    finished[-1] = 1
 
-    # Handling `finished`
-    new_doodle[-1, 2] = 0
-    new_doodle[-1, 3] = 0
-    new_doodle[-1, 4] = 1
+    new_doodle = np.hstack(
+        (
+            stroke_data[:, :2],
+            pen_on_paper[..., None],
+            pen_off_paper[..., None],
+            finished[..., None],
+        )
+    )
 
     if pad_length is not None and new_doodle.shape[0] < pad_length:
         padding = np.zeros((pad_length - new_doodle.shape[0], 5))
@@ -35,21 +37,47 @@ def encode_stroke_data(stroke_data: np.array, pad_length=None):
 
 
 def decode_stroke_data(stroke_data: np.array):
-    # Going from [delta_x, delta_y, pen_on_paper, pen_off_paper, finished] to [x, y, lift_pen]
+    # Going from [delta_x, delta_y, pen_on_paper, pen_off_paper, finished] to [delta_x, delta_y, lift_pen]
     new_doodle = np.zeros((stroke_data.shape[0], 3))
-    new_doodle[:, :2] = np.cumsum(stroke_data[:, :2], axis=0)
+    new_doodle[:, 0] = stroke_data[:, 0]
+    new_doodle[:, 1] = stroke_data[:, 1]
     new_doodle[:, 2] = np.logical_or(stroke_data[:, 3], stroke_data[:, 4])
     return new_doodle
 
 
 class DoodleDataset(Dataset):
-    def __init__(self, data_dir: Path, split: str, block_size: int, device=str):
+    def __init__(
+        self,
+        data_dir: Path,
+        split: str,
+        block_size: int,
+        scaled_size: int,
+        device: str,
+        mean: np.ndarray = None,
+        std: np.ndarray = None,
+    ):
+        """
+        Args:
+            data_dir: Path to the directory containing the dataset
+            split: "train", "test", or "valid"
+            block_size: Number of strokes to use in each block
+            scaled_size: Size of the scaled image (square)
+            device: Device to use for training ("cpu" or "cuda")
+        """
         self.data_dir = data_dir
         self.block_size = block_size
+        self.mean = mean
+        self.std = std
+        self.scaled_size = scaled_size
         self.data = {}
         self.class_embeddings = {}
         self.device = device
         self.clip_model, _ = clip.load("ViT-B/32", device=self.device)
+
+        if mean is not None and std is not None:
+            assert len(self.mean) == len(self.std) == 2, "Mean and std must have length 2"
+            self.mean = np.array([*mean, 0, 0, 0])
+            self.std = np.array([*std, 1, 1, 1])
 
         print("Preprocessing Data:")
         for filepath in tqdm(self.data_dir.glob("*.npz")):
@@ -122,6 +150,9 @@ class DoodleDataset(Dataset):
         y = full_doodle[block_idx + 1 : block_idx + self.block_size + 1]
         classname_embedding = self.class_embeddings[class_name]
 
+        if self.mean is not None and self.std is not None:
+            x = self._normalize_drawing(x)
+
         return torch.from_numpy(x), torch.from_numpy(y), classname_embedding
 
     def _extract_class_name(self, file: Path):
@@ -131,9 +162,26 @@ class DoodleDataset(Dataset):
         assert match, f"Regex for detecting classname failed on {file}"
         return match.group(1)
 
-    def _filter_data(data: np.ndarray):
-        
-        return data
+    def _scale_drawing(self, drawing):
+        min_x, max_x, min_y, max_y = get_bounds(drawing)
+
+        x_scale_factor = self.scaled_size / (max_x - min_x)
+        y_scale_factor = self.scaled_size / (max_y - min_y)
+
+        scaled_drawing = np.zeros_like(drawing)
+        scaled_drawing[:, 0] = drawing[:, 0] * x_scale_factor
+        scaled_drawing[:, 1] = drawing[:, 1] * y_scale_factor
+        return scaled_drawing
+
+    def _normalize_drawing(self, drawing):
+        return (drawing - self.mean) / self.std
+    
+    def _denormalize_drawing(self, drawing):
+        return drawing * self.std + self.mean
+
+    def _preprocess_data(self, data: np.ndarray):
+        preprocessed_data = [self._scale_drawing(d) for d in data]
+        return preprocessed_data
 
     def _extract_data(self, file: Path, split: str, pad_length: int):
         assert split in [
@@ -144,10 +192,10 @@ class DoodleDataset(Dataset):
 
         raw_data = np.load(file, encoding="latin1", allow_pickle=True)[split]
 
-        filtered_data = self._filter_data(raw_data)
+        preprocessed_data = self._preprocess_data(raw_data)
 
         encoded_doodles = []
-        for doodle in raw_data:
+        for doodle in preprocessed_data:
             encoded_doodles.append(encode_stroke_data(doodle, pad_length=pad_length))
 
         return encoded_doodles

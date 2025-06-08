@@ -37,7 +37,7 @@ def draw_strokes(data, factor=0.045, svg_filename = './sample.svg'):
   if not os.path.exists(os.path.dirname(svg_filename)):
     os.makedirs(os.path.dirname(svg_filename))
   min_x, max_x, min_y, max_y = get_bounds(data, factor)
-  dims = (10 + max_x - min_x, 10 + max_y - min_y)
+  dims = (30 + max_x - min_x, 30 + max_y - min_y)
   dwg = svgwrite.Drawing(svg_filename, size=dims)
   dwg.add(dwg.rect(insert=(0, 0), size=dims,fill='white'))
   lift_pen = 1

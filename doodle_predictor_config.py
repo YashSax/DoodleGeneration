@@ -8,6 +8,7 @@ class DoodlePredictorConfig:
         
         self.config_dict = config
         self.device = config["device"]
+        self.scaled_size = config["scaled_size"]
         self.clip_embedding_size = config["clip_embedding_size"]
         self.stroke_input_size = config["stroke_input_size"]
         self.stroke_embed_size = config["stroke_embed_size"] 

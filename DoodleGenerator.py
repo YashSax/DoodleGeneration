@@ -30,11 +30,18 @@ if ENABLE_WANDB:
 
 # Because we include the classname embedding as well as the stroke data, we request groups of block_size - 1
 # strokes from the dataset.
+
+mean = np.array([1.1523420567837017, -1.7892017952608004])
+std = np.array([17.661761786706826, 19.484090706411575])
+
 train_dataset = DoodleDataset(
     Path("./dataset"),
     split="train",
     block_size=config.block_size - 1,
+    scaled_size=config.scaled_size,
     device=config.device,
+    mean=mean, # Normalization
+    std=std,
 )
 train_dataloader = DataLoader(train_dataset, batch_size=config.batch_size)
 
@@ -42,7 +49,10 @@ test_dataset = DoodleDataset(
     Path("./dataset"),
     split="test",
     block_size=config.block_size - 1,
+    scaled_size=config.scaled_size,
     device=config.device,
+    mean=mean,  # Normalization
+    std=std,
 )
 test_dataloader = DataLoader(test_dataset, batch_size=config.batch_size)
 
@@ -89,9 +99,6 @@ for epoch_num in tqdm(range(num_epochs)):
                 model_out.double(), ys, position_coeff=config.position_loss_coeff, pen_state_coeff=config.pen_state_loss_coeff
             )
             test_losses.append(test_loss.item())
-            
-            if ENABLE_WANDB:
-                wandb.log({"test_loss": test_loss.item()})
     
     if ENABLE_WANDB:
         avg_test_loss = sum(test_losses) / len(test_losses)
@@ -104,3 +111,6 @@ if ENABLE_WANDB:
 
 os.makedirs(config.output_directory, exist_ok=True)
 torch.save(doodle_predictor.state_dict(), f"./{config.output_directory}/model_state_dict")
+with open(f"./{config.output_directory}/config.json", "w") as f:
+    config_dict = config.config_dict
+    json.dump(config_dict, f)
