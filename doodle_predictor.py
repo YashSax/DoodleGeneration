@@ -46,7 +46,7 @@ class DoodlePredictor(nn.Module):
         processed_classname_embedding = self.clip_embedding_layer(classname_embedding.unsqueeze(1))
 
         combined_input = torch.cat(
-            (encoded_strokes, processed_classname_embedding), dim=1
+            (processed_classname_embedding, encoded_strokes), dim=1
         )  # (batch_size, block_size, self.stroke_embed_size)
 
         pos_emb = self.position_embedding_table(
@@ -62,7 +62,6 @@ class DoodlePredictor(nn.Module):
 
 
 class StrokeTransformer(nn.Module):
-    # TODO: Add causal mask
     def __init__(
         self,
         num_transformer_blocks: int,
@@ -110,11 +109,11 @@ class StrokeEncoderMLP(nn.Module):
 
         # TODO: Batchnorm, or some type of norm?
         self.net = nn.Sequential(
-            nn.Linear(self.input_size, 256),
+            nn.Linear(self.input_size, 32),
             nn.ReLU(),
-            nn.Linear(256, 512),
+            nn.Linear(32, 32),
             nn.ReLU(),
-            nn.Linear(512, self.output_size),
+            nn.Linear(32, self.output_size),
         )
 
     def forward(self, x):
