@@ -109,11 +109,13 @@ class StrokeEncoderMLP(nn.Module):
 
         # TODO: Batchnorm, or some type of norm?
         self.net = nn.Sequential(
-            nn.Linear(self.input_size, 32),
+            nn.Linear(self.input_size, 64),
             nn.ReLU(),
-            nn.Linear(32, 32),
+            nn.Linear(64, 128),
             nn.ReLU(),
-            nn.Linear(32, self.output_size),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, self.output_size),
         )
 
     def forward(self, x):
@@ -128,11 +130,13 @@ class StrokeDecoderMLP(nn.Module):
         self.output_size = output_size
 
         self.net = nn.Sequential(
-            nn.Linear(self.input_size, 256),
+            nn.Linear(self.input_size, 64),
             nn.ReLU(),
-            nn.Linear(256, 128),
+            nn.Linear(64, 128),
             nn.ReLU(),
-            nn.Linear(128, self.output_size),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Linear(64, self.output_size),
         )
 
     def forward(self, x: torch.Tensor):
